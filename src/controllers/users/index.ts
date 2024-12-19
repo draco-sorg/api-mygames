@@ -1,5 +1,5 @@
-import { create } from './create';
+import * as create from './create';
 
 export const UsersController = {
-  create,
+  ...create,
 };

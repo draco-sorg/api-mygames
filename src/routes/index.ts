@@ -6,6 +6,6 @@ router.get('/healthy', (req, res) => {
   res.send('Tudo certo!');
 });
 
-router.post('/user', UsersController.create);
+router.post('/user', UsersController.createValidation, UsersController.create);
 
 export { router };
