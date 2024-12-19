@@ -3,6 +3,7 @@ import * as yup from 'yup';
 import { StatusCodes } from 'http-status-codes';
 import { IUser } from 'models/users';
 import { validation } from '../../middleware';
+import { UserProvider } from '../../database/providers';
 
 interface IBodyProps extends Omit<IUser, 'id'> {}
 
@@ -22,11 +23,15 @@ export const create = async (
   req: Request<{}, {}, IBodyProps>,
   res: Response
 ): Promise<any> => {
-  let validatedData: IBodyProps | undefined = undefined;
+  const result = await UserProvider.createUser(req.body);
 
-  console.log(req.body);
+  if (result instanceof Error) {
+    return res.status(StatusCodes.BAD_REQUEST).json({
+      errors: {
+        default: result.message,
+      },
+    });
+  }
 
-  return res
-    .status(StatusCodes.INTERNAL_SERVER_ERROR)
-    .json({ Error: 'Não Implementado' });
+  return res.status(StatusCodes.OK).json(result);
 };
