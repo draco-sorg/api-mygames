@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import * as yup from 'yup';
+import * as bcrypt from 'bcrypt';
 import { StatusCodes } from 'http-status-codes';
 import { IUser } from 'models/users';
 import { validation } from '../../middleware';
@@ -23,7 +24,7 @@ export const create = async (
   req: Request<{}, {}, IBodyProps>,
   res: Response
 ): Promise<any> => {
-  const { email } = req.body;
+  const { name, email, password, user_image, biography } = req.body;
 
   try {
     const user = await UserProvider.getUserByEmail(email);
@@ -36,7 +37,17 @@ export const create = async (
       });
     }
 
-    const result = await UserProvider.createUser(req.body);
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    const newUser = {
+      name,
+      email,
+      password: passwordHash,
+      user_image,
+      biography,
+    };
+
+    const result = await UserProvider.createUser(newUser);
 
     if (result instanceof Error) {
       return res.status(StatusCodes.BAD_REQUEST).json({

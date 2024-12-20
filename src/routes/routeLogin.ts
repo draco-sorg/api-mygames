@@ -1,4 +1,4 @@
-import { UsersController } from '../controllers';
+import { LoginProvider, UsersController } from '../controllers';
 import { Router } from 'express';
 const routerLogin = Router();
 
@@ -7,5 +7,6 @@ routerLogin.post(
   UsersController.createValidation,
   UsersController.create
 );
+routerLogin.post('/login', LoginProvider.login);
 
 export { routerLogin };
