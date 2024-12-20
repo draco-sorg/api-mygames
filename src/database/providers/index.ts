@@ -1,5 +1,7 @@
-import { createUser } from './users';
+import { createUser, getUserById, getUserByEmail } from './users';
 
 export const UserProvider = {
   createUser,
+  getUserById,
+  getUserByEmail,
 };

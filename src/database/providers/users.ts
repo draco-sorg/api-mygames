@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 export const createUser = async (
   user: Omit<IUser, 'id'>
-): Promise<String | Error> => {
+): Promise<Omit<IUser, 'id' | 'password'> | Error> => {
   try {
     const newUser = {
       ...user,
@@ -13,14 +13,46 @@ export const createUser = async (
     };
     const [result] = await db(ETablesNames.users)
       .insert(newUser)
-      .returning('id');
+      .returning(['name', 'email', 'user_image', 'biography']);
 
     if (result) {
-      return result.id;
+      return result;
     }
 
     return new Error('Erro ao cadastrar usuário');
   } catch (error) {
     return new Error('Erro ao cadastrar usuário');
+  }
+};
+
+export const getUserById = async (id: string): Promise<any | Error> => {
+  try {
+    const [user] = await db(ETablesNames.users)
+      .select('id', 'name', 'email', 'user_image', 'biography')
+      .where('id', id);
+
+    if (user) {
+      return user;
+    }
+
+    return new Error('Usuário não encontrado');
+  } catch (error) {
+    return new Error('Erro no banco de dados');
+  }
+};
+
+export const getUserByEmail = async (email: string): Promise<any | Error> => {
+  try {
+    const [user] = await db(ETablesNames.users)
+      .select('id')
+      .where('email', '=', email);
+
+    if (user) {
+      return user.id;
+    }
+
+    return new Error('Usuário não encontrado');
+  } catch (error) {
+    return new Error('Erro no banco de dados');
   }
 };
