@@ -1,12 +1,30 @@
 import { UserProvider } from '../../database/providers';
 import { Request, Response } from 'express';
+import * as yup from 'yup';
 import { StatusCodes } from 'http-status-codes';
 import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
+import { IUser } from 'models/users';
+import { validation } from '../../middleware';
 
 const senha_jwt = process.env.SENHA_JWT!;
 
-export const login = async (req: Request, res: Response): Promise<any> => {
+interface IBodyProps
+  extends Omit<IUser, 'id' | 'name' | 'user_image' | 'biography'> {}
+
+export const loginValidation = validation((getSchema) => ({
+  body: getSchema<IBodyProps>(
+    yup.object().shape({
+      email: yup.string().required().email(),
+      password: yup.string().required().min(6).max(20),
+    })
+  ),
+}));
+
+export const login = async (
+  req: Request<{}, {}, IBodyProps>,
+  res: Response
+): Promise<any> => {
   const { email, password } = req.body;
 
   try {
