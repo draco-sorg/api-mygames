@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import * as yup from 'yup';
 import * as bcrypt from 'bcrypt';
 import { StatusCodes } from 'http-status-codes';
-import { IUser } from 'models/users';
+import { CreateUserResponse, IUser } from 'models/users';
 import { validation } from '../../middleware';
 import { UserProvider } from '../../database/providers';
 
@@ -23,7 +23,7 @@ export const createValidation = validation((getSchema) => ({
 export const create = async (
   req: Request<{}, {}, IBodyProps>,
   res: Response
-): Promise<any> => {
+): Promise<Response<CreateUserResponse>> => {
   const { name, email, password, user_image, biography } = req.body;
 
   try {

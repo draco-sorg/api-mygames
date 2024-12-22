@@ -4,7 +4,7 @@ import * as yup from 'yup';
 import { StatusCodes } from 'http-status-codes';
 import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
-import { IUser } from 'models/users';
+import { IUser, LoginUserResponse } from 'models/users';
 import { validation } from '../../middleware';
 
 const senha_jwt = process.env.SENHA_JWT!;
@@ -24,7 +24,7 @@ export const loginValidation = validation((getSchema) => ({
 export const login = async (
   req: Request<{}, {}, IBodyProps>,
   res: Response
-): Promise<any> => {
+): Promise<Response<LoginUserResponse>> => {
   const { email, password } = req.body;
 
   try {

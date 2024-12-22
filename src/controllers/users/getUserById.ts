@@ -1,12 +1,13 @@
 import { UserProvider } from './../../database/providers';
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
+import { IUser } from 'models/users';
 
 export const getUserById = async (
   req: Request,
   res: Response
-): Promise<any> => {
-  const { id } = req.params;
+): Promise<Response<IUser | Error>> => {
+  const id = req.userId!;
 
   const result = await UserProvider.getUserById(id);
 

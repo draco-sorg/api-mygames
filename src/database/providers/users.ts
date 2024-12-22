@@ -25,7 +25,7 @@ export const createUser = async (
   }
 };
 
-export const getUserById = async (id: string): Promise<any | Error> => {
+export const getUserById = async (id: string): Promise<IUser | Error> => {
   try {
     const [user] = await db(ETablesNames.users).select('*').where('id', id);
 
@@ -39,7 +39,7 @@ export const getUserById = async (id: string): Promise<any | Error> => {
   }
 };
 
-export const getUserByEmail = async (email: string): Promise<any | Error> => {
+export const getUserByEmail = async (email: string): Promise<IUser | Error> => {
   try {
     const [user] = await db(ETablesNames.users)
       .select('*')

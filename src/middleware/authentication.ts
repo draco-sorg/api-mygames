@@ -1,5 +1,9 @@
+/// <reference types="../types/express" />
+
 import { UserProvider } from '../database/providers';
 import { NextFunction, Request, Response } from 'express';
+
+import { StatusCodes } from 'http-status-codes';
 import * as jwt from 'jsonwebtoken';
 
 const senha_jwt = process.env.SENHA_JWT!;
@@ -8,11 +12,15 @@ export const authentication = async (
   req: Request,
   res: Response,
   next: NextFunction
-) => {
+): Promise<any> => {
   const { authorization } = req.headers;
 
   if (!authorization) {
-    return new Error('Precisa de autorização!');
+    return res.status(StatusCodes.UNAUTHORIZED).json({
+      errors: {
+        default: 'Precisa de autorização!',
+      },
+    });
   }
 
   try {
@@ -22,11 +30,21 @@ export const authentication = async (
     const user = await UserProvider.getUserById(decoded.id);
 
     if (user instanceof Error) {
-      return new Error('Email e/ou senha invalido');
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        errors: {
+          default: 'Email e/ou senha invalido',
+        },
+      });
     }
 
     req.userId = user.id;
 
     next();
-  } catch (error) {}
+  } catch (error) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      errors: {
+        default: 'Erro interno no servidor',
+      },
+    });
+  }
 };
