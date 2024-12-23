@@ -37,3 +37,18 @@ export const insertGame = async (data: GameWithoutId): InsertGameResponse => {
     };
   }
 };
+
+export const getGameById = async (id: string): GetGameByIdResponse => {
+  try {
+    const [result] = await db(ETablesNames.games).select('*').where('id', id);
+
+    if (result) return result;
+
+    return { type: 'GAME_NOT_FOUND', message: 'Jogo não encontrado!' };
+  } catch (error) {
+    return {
+      type: 'INTERNAL_SERVER_ERROR',
+      message: 'Erro interno no servidor',
+    };
+  }
+};
