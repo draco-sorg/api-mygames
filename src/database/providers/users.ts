@@ -1,12 +1,17 @@
 import { db } from '../db';
 import { ETablesNames } from './../ETablesNames';
-import { IUser, UpdateUserInput } from './../../models/users';
+import {
+  CreateUserResponse,
+  GetUserResponse,
+  IUser,
+  UpdateUserInput,
+  UpdateUserResponse,
+} from './../../models/users';
 import { v4 as uuidv4 } from 'uuid';
-import { ErrorResponse } from 'models/errors';
 
 export const createUser = async (
   user: Omit<IUser, 'id'>
-): Promise<Omit<IUser, 'id' | 'password'> | ErrorResponse> => {
+): CreateUserResponse => {
   try {
     const newUser = {
       ...user,
@@ -21,7 +26,7 @@ export const createUser = async (
     }
 
     return {
-      type: 'CREATE_USER',
+      type: 'CREATE',
       message: 'Erro ao cadastrar usuário',
     };
   } catch (error) {
@@ -32,9 +37,7 @@ export const createUser = async (
   }
 };
 
-export const getUserById = async (
-  id: string
-): Promise<IUser | ErrorResponse> => {
+export const getUserById = async (id: string): GetUserResponse => {
   try {
     const [user] = await db(ETablesNames.users).select('*').where('id', id);
 
@@ -51,9 +54,7 @@ export const getUserById = async (
   }
 };
 
-export const getUserByEmail = async (
-  email: string
-): Promise<IUser | ErrorResponse> => {
+export const getUserByEmail = async (email: string): GetUserResponse => {
   try {
     const [user] = await db(ETablesNames.users)
       .select('*')
@@ -75,7 +76,7 @@ export const getUserByEmail = async (
 export const updateUser = async (
   id: string,
   data: UpdateUserInput
-): Promise<IUser | ErrorResponse> => {
+): UpdateUserResponse => {
   try {
     const [result] = await db(ETablesNames.users)
       .update(data)
