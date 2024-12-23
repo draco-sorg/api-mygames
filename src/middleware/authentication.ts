@@ -5,6 +5,7 @@ import { NextFunction, Request, Response } from 'express';
 
 import { StatusCodes } from 'http-status-codes';
 import * as jwt from 'jsonwebtoken';
+import { IUser } from 'models/users';
 
 const senha_jwt = process.env.SENHA_JWT!;
 
@@ -37,7 +38,7 @@ export const authentication = async (
       });
     }
 
-    req.userId = user.id;
+    req.userId = (user as IUser).id;
 
     next();
   } catch (error) {

@@ -2,9 +2,10 @@ import { Request, Response } from 'express';
 import * as yup from 'yup';
 import * as bcrypt from 'bcrypt';
 import { StatusCodes } from 'http-status-codes';
-import { CreateUserResponse, IUser } from 'models/users';
+import { IUser } from 'models/users';
 import { validation } from '../../middleware';
 import { UserProvider } from '../../database/providers';
+import { ErrorResponse } from 'models/errors';
 
 interface IBodyProps extends Omit<IUser, 'id'> {}
 
@@ -23,23 +24,23 @@ export const createValidation = validation((getSchema) => ({
 export const create = async (
   req: Request<{}, {}, IBodyProps>,
   res: Response
-): Promise<Response<CreateUserResponse>> => {
+): Promise<any> => {
   const { name, email, password, user_image, biography } = req.body;
 
   try {
-    const user = await UserProvider.getUserByEmail(email);
+    const result = await UserProvider.getUserByEmail(email);
 
-    if (!(user instanceof Error)) {
+    if (!(result as ErrorResponse).type) {
       return res.status(StatusCodes.BAD_REQUEST).json({
         errors: {
-          default: 'Email já cadastrado.',
+          default: 'Email já cadastrado',
         },
       });
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
 
-    const newUser = {
+    const data = {
       name,
       email,
       password: passwordHash,
@@ -47,17 +48,18 @@ export const create = async (
       biography,
     };
 
-    const result = await UserProvider.createUser(newUser);
+    const user = await UserProvider.createUser(data);
 
-    if (result instanceof Error) {
+    if ((user as ErrorResponse).type) {
       return res.status(StatusCodes.BAD_REQUEST).json({
         errors: {
-          default: result.message,
+          Type: (user as ErrorResponse).type,
+          Message: (user as ErrorResponse).message,
         },
       });
     }
 
-    return res.status(StatusCodes.OK).json(result);
+    return res.status(StatusCodes.OK).json(user);
   } catch (error) {
     return res.status(StatusCodes.BAD_REQUEST).json({
       errors: {

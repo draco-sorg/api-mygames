@@ -4,8 +4,9 @@ import * as yup from 'yup';
 import { StatusCodes } from 'http-status-codes';
 import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
-import { IUser, LoginUserResponse } from 'models/users';
+import { IUser } from 'models/users';
 import { validation } from '../../middleware';
+import { ErrorResponse } from 'models/errors';
 
 const senha_jwt = process.env.SENHA_JWT!;
 
@@ -24,21 +25,24 @@ export const loginValidation = validation((getSchema) => ({
 export const login = async (
   req: Request<{}, {}, IBodyProps>,
   res: Response
-): Promise<Response<LoginUserResponse>> => {
+): Promise<any> => {
   const { email, password } = req.body;
 
   try {
-    const user = await UserProvider.getUserByEmail(email);
+    const result = await UserProvider.getUserByEmail(email);
 
-    if (user instanceof Error) {
+    if ((result as ErrorResponse).type) {
       return res.status(StatusCodes.BAD_REQUEST).json({
         errors: {
-          default: user.message,
+          default: (result as ErrorResponse).message,
         },
       });
     }
 
-    const checkPassword = await bcrypt.compare(password, user.password);
+    const checkPassword = await bcrypt.compare(
+      password,
+      (result as IUser).password
+    );
 
     if (!checkPassword) {
       return res.status(StatusCodes.OK).json({
@@ -47,15 +51,16 @@ export const login = async (
         },
       });
     }
+    const id = (result as IUser).id;
 
-    const token = jwt.sign({ id: user.id }, senha_jwt, { expiresIn: '2h' });
+    const token = jwt.sign({ id: id }, senha_jwt, { expiresIn: '2h' });
 
-    const { password: _, ...userLogin } = user;
+    const { password: _, ...user } = result as IUser;
 
-    return res.status(StatusCodes.OK).json({ userLogin, token });
+    return res.status(StatusCodes.OK).json({ user, token });
   } catch (error) {
     return res
-      .status(StatusCodes.BAD_REQUEST)
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
       .json({ Error: 'Erro no servidor' });
   }
 };

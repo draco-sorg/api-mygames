@@ -1,11 +1,12 @@
 import { db } from '../db';
 import { ETablesNames } from './../ETablesNames';
-import { IUser } from './../../models/users';
+import { IUser, UpdateUserInput } from './../../models/users';
 import { v4 as uuidv4 } from 'uuid';
+import { ErrorResponse } from 'models/errors';
 
 export const createUser = async (
   user: Omit<IUser, 'id'>
-): Promise<Omit<IUser, 'id' | 'password'> | Error> => {
+): Promise<Omit<IUser, 'id' | 'password'> | ErrorResponse> => {
   try {
     const newUser = {
       ...user,
@@ -19,13 +20,21 @@ export const createUser = async (
       return result;
     }
 
-    return new Error('Erro ao cadastrar usuário');
+    return {
+      type: 'CREATE_USER',
+      message: 'Erro ao cadastrar usuário',
+    };
   } catch (error) {
-    return new Error('Erro ao cadastrar usuário');
+    return {
+      type: 'INTERNAL_SERVER_ERROR',
+      message: 'Error interno no servidor',
+    };
   }
 };
 
-export const getUserById = async (id: string): Promise<IUser | Error> => {
+export const getUserById = async (
+  id: string
+): Promise<IUser | ErrorResponse> => {
   try {
     const [user] = await db(ETablesNames.users).select('*').where('id', id);
 
@@ -33,13 +42,18 @@ export const getUserById = async (id: string): Promise<IUser | Error> => {
       return user;
     }
 
-    return new Error('Usuário não encontrado');
+    return { type: 'USER_NOT_FOUND', message: 'Usuário não encontrado' };
   } catch (error) {
-    return new Error('Erro no banco de dados');
+    return {
+      type: 'INTERNAL_SERVER_ERROR',
+      message: 'Error interno no servidor',
+    };
   }
 };
 
-export const getUserByEmail = async (email: string): Promise<IUser | Error> => {
+export const getUserByEmail = async (
+  email: string
+): Promise<IUser | ErrorResponse> => {
   try {
     const [user] = await db(ETablesNames.users)
       .select('*')
@@ -49,8 +63,36 @@ export const getUserByEmail = async (email: string): Promise<IUser | Error> => {
       return user;
     }
 
-    return new Error('Usuário não encontrado');
+    return { type: 'USER_NOT_FOUND', message: 'Usuário não encontrado' };
   } catch (error) {
-    return new Error('Erro no banco de dados');
+    return {
+      type: 'INTERNAL_SERVER_ERROR',
+      message: 'Error interno no servidor',
+    };
+  }
+};
+
+export const updateUser = async (
+  id: string,
+  data: UpdateUserInput
+): Promise<IUser | ErrorResponse> => {
+  try {
+    const [result] = await db(ETablesNames.users)
+      .update(data)
+      .where('id', id)
+      .returning('*');
+
+    if (!result)
+      return {
+        type: 'USER_NOT_FOUND',
+        message: 'Usuário não encontrado',
+      };
+
+    return result;
+  } catch (error) {
+    return {
+      type: 'INTERNAL_SERVER_ERROR',
+      message: 'Error interno no servidor',
+    };
   }
 };

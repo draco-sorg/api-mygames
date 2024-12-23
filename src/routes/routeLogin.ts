@@ -3,7 +3,7 @@ import { Router } from 'express';
 const routerLogin = Router();
 
 routerLogin.post(
-  '/user',
+  '/cadastrar',
   UsersController.createValidation,
   UsersController.create
 );
