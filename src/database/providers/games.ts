@@ -3,6 +3,7 @@ import { db } from '../db';
 import {
   GameWithoutId,
   GetGameByIdResponse,
+  getGameBySteamIdResponse,
   InsertGameResponse,
 } from 'models/games';
 import { v4 as uuidv4 } from 'uuid';
@@ -41,6 +42,25 @@ export const insertGame = async (data: GameWithoutId): InsertGameResponse => {
 export const getGameById = async (id: string): GetGameByIdResponse => {
   try {
     const [result] = await db(ETablesNames.games).select('*').where('id', id);
+
+    if (result) return result;
+
+    return { type: 'GAME_NOT_FOUND', message: 'Jogo não encontrado!' };
+  } catch (error) {
+    return {
+      type: 'INTERNAL_SERVER_ERROR',
+      message: 'Erro interno no servidor',
+    };
+  }
+};
+
+export const getGameBySteamId = async (
+  steamId: string
+): getGameBySteamIdResponse => {
+  try {
+    const [result] = await db(ETablesNames.games)
+      .select('*')
+      .where('steam_id', steamId);
 
     if (result) return result;
 

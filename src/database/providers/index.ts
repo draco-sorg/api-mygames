@@ -1,5 +1,5 @@
 import { createUser, getUserById, getUserByEmail, updateUser } from './users';
-import { getGameById, insertGame } from './games';
+import { getGameById, insertGame, getGameBySteamId } from './games';
 
 export const UserProvider = {
   createUser,
@@ -11,4 +11,5 @@ export const UserProvider = {
 export const GameProvider = {
   insertGame,
   getGameById,
+  getGameBySteamId,
 };

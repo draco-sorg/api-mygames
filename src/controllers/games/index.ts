@@ -1,7 +1,7 @@
 import * as insert from './insert';
-import * as getGameById from './getGameById';
+import * as getGame from './getGame';
 
 export const GamesController = {
   ...insert,
-  ...getGameById,
+  ...getGame,
 };

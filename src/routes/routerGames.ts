@@ -7,6 +7,7 @@ routerGames.post(
   GamesController.insertValidation,
   GamesController.insert
 );
-routerGames.get('/game/:id', GamesController.getGameById);
+
+routerGames.get('/game', GamesController.getGame);
 
 export { routerGames };

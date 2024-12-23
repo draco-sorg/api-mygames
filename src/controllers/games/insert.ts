@@ -11,7 +11,7 @@ interface IBodyProps extends Omit<IGame, 'id'> {}
 export const insertValidation = validation((getSchema) => ({
   body: getSchema<IBodyProps>(
     yup.object().shape({
-      steam_id: yup.number().required(),
+      steam_id: yup.string().required(),
       name: yup.string().required(),
       synopsis: yup.string().required(),
       achievements: yup.number().required(),
